@@ -14,6 +14,7 @@ class Eknet:
         self.netmask = data['netmask']
         self.ip = data['my_ip']
         self.dns = data['dns']
+        self.default_gateway = data['gateway']
         self.network_addr = self.calc_network_addr(self.get_ip_bin(), self.get_subnet_bin())
         self.broadcast_addr = self.calc_broadcast_addr(self.get_ip_bin(), self.get_subnet_bin())
     # getters
@@ -61,10 +62,46 @@ class Eknet:
         bin_net_addr = [network_addr_str[i:i + 8] for i in
                         range(0, len(network_addr_str), 8)]  # list of the octacts as binary representation
 
-        ipv4_net_addr = [str(int(octat, 2)) for octat in bin_net_addr]  # list of the octacts as integer representation
+        ipv4_addr = self.bin_to_dec(bin_net_addr, 1)  # list of the octacts as integer representation
 
-        ipv4_addr_str = '.'.join(ipv4_net_addr)  # 1 string represting the ip address of network
-        return ipv4_addr_str
+        return ipv4_addr
+
+    # format: - 1 -> str
+    #         - 0 -> list
+    def bin_to_dec(self, binstr, str_format):
+
+        if type(binstr) is str:
+            binstr = binstr.split('.')
+            if str_format:
+                result = [str(int(octat, 2)) for octat in binstr]
+                return '.'.join(result)
+            else:
+                return [int(octat, 2) for octat in binstr]
+        elif type(binstr) is list:
+            if str_format:
+                result = [str(int(octat, 2)) for octat in binstr]
+                return '.'.join(result)
+            else:
+                return [int(octat, 2) for octat in binstr]
+        else:
+            pass
+
+    def dec_to_bin(self, decstr, str_format):
+        if type(decstr) is str:
+            decstr = decstr.split('.')
+            if str_format:
+                result = ['{0:08b}'.format(int(octat)) for octat in decstr]
+                return '.'.join(result)
+            else:
+                return ['{0:08b}'.format(octat) for octat in decstr]
+        elif type(decstr) is list:
+            if str_format:
+                result = ['{0:08b}'.format(octat) for octat in decstr]
+                return '.'.join(result)
+            else:
+                return ['{0:08b}'.format(octat) for octat in decstr]
+        else:
+            pass
 
 
     def calc_broadcast_addr(self, ip, netmask):
@@ -91,8 +128,9 @@ class Eknet:
 
 
     def display_raw_data(self):
-        print 'Current IP : ', self.ip
-        print 'Default Gateway: ', self.default_gateway
+        print 'Current IP: \n', 'dec: ', self.ip , 'Bin: ', self.get_ip_bin()
+        print '\nDefault Gateway: ', self.default_gateway
         print 'DNS server: ', self.dns
-        print 'Network IP: ', self.network_addr
+        print 'Subnet mask: ', self.netmask
+        print 'Network IP: \n', 'dec: ', self.network_addr , '\nBin: ', self.dec_to_bin(self.network_addr, 1)
         print 'Broadcast IP', self.broadcast_addr
